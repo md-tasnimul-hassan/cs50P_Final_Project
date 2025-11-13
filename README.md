@@ -1,2 +1,2 @@
-# cs50_Final_Project
+# cs50 Python Final Project
 An interative game zone with user authentication, personal statistics and leaderboard.
