@@ -1,5 +1,6 @@
 import re
 import random
+import time
 
 FIRSTUSERMOVE = True 
 WIN_LINES = [
@@ -55,7 +56,7 @@ def userMove(board, userMarker):
             matches = re.search (r"^(\d{1}) (\d{1})$", response)
             x = int(matches.group(1))
             y = int(matches.group(2))
-            if(x not in [1, 2, 3] or y not in [1, 2, 3]):
+            if(x not in [1, 2, 3] or y not in [1, 2, 3] or board[x-1][y-1]!=' '):
                 raise ValueError
             break
         except:
@@ -63,9 +64,91 @@ def userMove(board, userMarker):
             pass
     board[x-1][y-1] = userMarker 
     
+def easyAiMove(board, aiMarker):
+    empty = [(r, c) for r in range(3) for c in range(3) if board[r][c] == " "]
+    if empty:
+        r, c = random.choice(empty)
+        board[r][c] = aiMarker
 
-def aiMove(board, aiMarker):
-    pass
+def mediumAiMove(board, aiMarker, playerMarker):
+    print("AI choosed: ",end='')
+    time.sleep(1)
+    # try to win
+    for r in range(3):
+        for c in range(3):
+            if board[r][c] == " ":
+                board[r][c] = aiMarker
+                if checkStatus(board)[1] == aiMarker:
+                    return
+                board[r][c] = " "
+
+    # try to block user
+    for r in range(3):
+        for c in range(3):
+            if board[r][c] == " ":
+                board[r][c] = playerMarker
+                if checkStatus(board)[1] == playerMarker:
+                    board[r][c] = aiMarker
+                    return
+                board[r][c] = " "
+
+    # otherwise random
+    empty = [(r, c) for r in range(3) for c in range(3) if board[r][c] == " "]
+    if empty:
+        r, c = random.choice(empty)
+        board[r][c] = aiMarker
+    print(f"{r+1} {c+1}")
+
+def hardAiMove(board, aiMarker, playerMarker):
+
+    def minimax(bd, isMaximizing):
+        status, winner = checkStatus(bd)
+
+        if status:
+            if winner == aiMarker:
+                return 1
+            elif winner == playerMarker:
+                return -1
+            else:
+                return 0
+
+        if isMaximizing:
+            best = -float("inf")
+            for r in range(3):
+                for c in range(3):
+                    if bd[r][c] == " ":
+                        bd[r][c] = aiMarker
+                        score = minimax(bd, False)
+                        bd[r][c] = " "
+                        best = max(best, score)
+            return best
+        else:
+            best = float("inf")
+            for r in range(3):
+                for c in range(3):
+                    if bd[r][c] == " ":
+                        bd[r][c] = playerMarker
+                        score = minimax(bd, True)
+                        bd[r][c] = " "
+                        best = min(best, score)
+            return best
+
+    bestScore = -float("inf")
+    bestMove = None
+
+    for r in range(3):
+        for c in range(3):
+            if board[r][c] == " ":
+                board[r][c] = aiMarker
+                score = minimax(board, False)
+                board[r][c] = " "
+                if score > bestScore:
+                    bestScore = score
+                    bestMove = (r, c)
+
+    if bestMove:
+        r, c = bestMove
+        board[r][c] = aiMarker
 
 def tickTacToe():
     win_messages = [
@@ -110,6 +193,11 @@ def tickTacToe():
     while (not checkStatus(board)[0]):
         userMove(board, userMarker)
         printBoard(board)
+        if(not checkStatus(board)[0]):
+            hardAiMove(board, aiMarker, userMarker)
+            printBoard(board)
+        else:
+            break
     
     if(checkStatus(board)[1] == userMarker):
         print(random.choice(win_messages))
@@ -119,3 +207,4 @@ def tickTacToe():
         print(random.choice(draw_messages))
 
 tickTacToe()
+
