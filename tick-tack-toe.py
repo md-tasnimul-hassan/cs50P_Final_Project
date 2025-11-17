@@ -1,8 +1,11 @@
 import re
 import random
 import time
+from prettytable import PrettyTable
 
-FIRSTUSERMOVE = True 
+global FIRSTUSERMOVE 
+FIRSTUSERMOVE = True
+
 WIN_LINES = [
     [(0,0), (0,1), (0,2)],  # rows
     [(1,0), (1,1), (1,2)],
@@ -65,20 +68,33 @@ def userMove(board, userMarker):
     board[x-1][y-1] = userMarker 
     
 def easyAiMove(board, aiMarker):
+    print("AI is thinking",end="")
+    for _ in range(3):
+        time.sleep(0.7)
+        print(".",end="",flush=True)
+    print("\r\033[K", end="")
+
     empty = [(r, c) for r in range(3) for c in range(3) if board[r][c] == " "]
     if empty:
         r, c = random.choice(empty)
         board[r][c] = aiMarker
+    
+    print(f"AI chose: {r+1} {c+1}")
 
 def mediumAiMove(board, aiMarker, playerMarker):
-    print("AI choosed: ",end='')
-    time.sleep(1)
+    print("AI is thinking",end="")
+    for _ in range(3):
+        time.sleep(0.7)
+        print(".",end="",flush=True)
+    print("\r\033[K", end="")
+    
     # try to win
     for r in range(3):
         for c in range(3):
             if board[r][c] == " ":
                 board[r][c] = aiMarker
                 if checkStatus(board)[1] == aiMarker:
+                    print(f"AI chose: {r+1} {c+1}")
                     return
                 board[r][c] = " "
 
@@ -89,6 +105,7 @@ def mediumAiMove(board, aiMarker, playerMarker):
                 board[r][c] = playerMarker
                 if checkStatus(board)[1] == playerMarker:
                     board[r][c] = aiMarker
+                    print(f"AI chose: {r+1} {c+1}")
                     return
                 board[r][c] = " "
 
@@ -97,9 +114,15 @@ def mediumAiMove(board, aiMarker, playerMarker):
     if empty:
         r, c = random.choice(empty)
         board[r][c] = aiMarker
-    print(f"{r+1} {c+1}")
+    print(f"AI chose: {r+1} {c+1}")
 
 def hardAiMove(board, aiMarker, playerMarker):
+
+    print("AI is thinking", end="")
+    for _ in range(3):
+        time.sleep(0.7)
+        print(".", end="", flush=True)
+    print("\r\033[K", end="")
 
     def minimax(bd, isMaximizing):
         status, winner = checkStatus(bd)
@@ -134,7 +157,7 @@ def hardAiMove(board, aiMarker, playerMarker):
             return best
 
     bestScore = -float("inf")
-    bestMove = None
+    move = None  # store the chosen move
 
     for r in range(3):
         for c in range(3):
@@ -144,11 +167,12 @@ def hardAiMove(board, aiMarker, playerMarker):
                 board[r][c] = " "
                 if score > bestScore:
                     bestScore = score
-                    bestMove = (r, c)
+                    move = (r, c)
 
-    if bestMove:
-        r, c = bestMove
+    if move:
+        r, c = move
         board[r][c] = aiMarker
+        print(f"AI chose: {r+1} {c+1}")
 
 def tickTacToe():
     win_messages = [
@@ -164,12 +188,12 @@ def tickTacToe():
 
     lose_messages = [
         "You lost! Don’t worry, the computer doesn’t hold grudges (usually).",
-        "GG! I win again, and your ego might need a bandage.",
+        "GG! I win, and your ego might need a bandage.",
         "Ouch! That loss must sting... don’t worry, here is some tissues.",
         "You lost! It’s okay, everyone needs practice (except me).",
         "You lost! I’d say 'try harder,' but I already know you will.",
         "I win! Don’t feel bad, human, it happens to the best of us.",
-        "Lost again? Blame the computer, not your poor choices."
+        "Lost? Blame the computer, not your poor choices. HaHa"
     ]
 
     draw_messages = [
@@ -183,6 +207,21 @@ def tickTacToe():
     ]
 
     board = [[" "]*3 for _ in range(3)]
+
+    mode = PrettyTable()
+    mode.field_names = ["Command", "Difficulty"]
+    mode.add_rows(
+        [
+            ["1", "Chilling"],
+            ["2", "Serious"],
+            ["3", "Bone Cracking"],
+        ]
+    )
+    print(mode)
+    while True:
+        choice = input("Select a difficulty: ")
+        if(choice in ['1','2','3']):
+            break
     
     while True:
         userMarker = input("Choose: 'o' or 'x' ? ")
@@ -194,7 +233,13 @@ def tickTacToe():
         userMove(board, userMarker)
         printBoard(board)
         if(not checkStatus(board)[0]):
-            hardAiMove(board, aiMarker, userMarker)
+            match(choice):
+                case '1':
+                    easyAiMove(board, aiMarker)
+                case '2':
+                    mediumAiMove(board, aiMarker, userMarker)
+                case '3':
+                    hardAiMove(board, aiMarker, userMarker)
             printBoard(board)
         else:
             break
