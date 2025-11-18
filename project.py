@@ -61,41 +61,42 @@ def login():
     mainMenu(name, id)
 
 def mainMenu(name="Guest", id=None):
-    table = PrettyTable()
-    table.field_names = ["Option", "Name"]
-    table.add_rows(
-        [
-            ["1", "Play Tick-Tac-Toe"],
-            ["2", "Play Hangman"],
-            ["3", "Play Little Professor"],
-            ["4", "Show My Statistics"],
-            ["0", "EXIT"],
-        ]
-    )
-    print(table)
     while True:
-        try:
-            response = input("Option: ")
-            if response in ['1', '2', '3', '4', '0']:
-                break
-        except:
-            print("Invalid input!")
-    
-    match(response):
-        case '1':
-            pass
-        case '2':
-            pass
-        case '3':
-            pass 
-        case '4':
-            showStat(id)
-        case '0':
-            print("Exiting successfully",end="")
-            for _ in range(3):
-                time.sleep(0.5)
-                print(".",end='',flush=True)
-            sys.exit(f"\nGood Bye, {name}!")
+        table = PrettyTable()
+        table.field_names = ["Option", "Name"]
+        table.add_rows(
+            [
+                ["1", "Play Tick-Tac-Toe"],
+                ["2", "Play Hangman"],
+                ["3", "Play Little Professor"],
+                ["4", "Show My Statistics"],
+                ["0", "EXIT"],
+            ]
+        )
+        print(table)
+        while True:
+            try:
+                response = input("Option: ")
+                if response in ['1', '2', '3', '4', '0']:
+                    break
+            except:
+                print("Invalid input!")
+        
+        match(response):
+            case '1':
+                pass
+            case '2':
+                pass
+            case '3':
+                pass 
+            case '4':
+                showStat(id)
+            case '0':
+                print("Exiting successfully",end="")
+                for _ in range(3):
+                    time.sleep(0.5)
+                    print(".",end='',flush=True)
+                sys.exit(f"\nGood Bye, {name}!")
 
 def about():
     table = PrettyTable()
@@ -109,7 +110,7 @@ def about():
     )
     print("\n")
     print(table)
-    input("\nPress any key to go back.")
+    input("\nPress enter to go back.")
     main()
     
 
