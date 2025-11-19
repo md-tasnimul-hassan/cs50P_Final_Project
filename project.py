@@ -3,18 +3,119 @@ import sys
 import time
 import csv
 import re
+from games.tickTackToe import tickTacToe
+from games.hangman import hangman
+from games.littleProfessor import littleProfessor
 
-def updateStat(id):
-    if(id == None):
+def updateStat(id, gameName, total, win, lose, draw=0):
+    """Update user statistics in the database after playing a game"""
+    if id == None:
         return
-    pass
+    
+    # Read current database
+    db = []
+    with open("stat/db.csv", "r") as f:
+        reader = csv.DictReader(f)
+        for line in reader:
+            db.append(line)
+    
+    # Map game names to CSV column prefixes
+    game_prefixes = {
+        "t": "ttt",   # Tic-Tac-Toe
+        "h": "hm",    # Hangman
+        "l": "lp"     # Little Professor
+    }
+    
+    if gameName not in game_prefixes:
+        return
+    
+    prefix = game_prefixes[gameName]
+    
+    # Find and update user's stats
+    for user in db:
+        if user["id"] == id:
+            # Update games, wins, losses (and draws for ttt)
+            user[f"{prefix}_games"] = str(int(user[f"{prefix}_games"]) + total)
+            user[f"{prefix}_wins"] = str(int(user[f"{prefix}_wins"]) + win)
+            user[f"{prefix}_losses"] = str(int(user[f"{prefix}_losses"]) + lose)
+            if prefix == "ttt":  # Only Tic-Tac-Toe has draws
+                user[f"{prefix}_draws"] = str(int(user[f"{prefix}_draws"]) + draw)
+            break
+    
+    # Write updated database back
+    with open("stat/db.csv", "w", newline='') as f:
+        fieldnames = ["id", "name", "ttt_games", "ttt_wins", "ttt_losses", "ttt_draws", 
+                     "hm_games", "hm_wins", "hm_losses", "lp_games", "lp_wins", "lp_losses"]
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(db)
 
 def showStat(id):
-    if(id == None):
-        print("Login to see your stats.")
-        mainMenu()
-    else:
-        pass
+    """Display user statistics from all games"""
+    if id == None:
+        print("\nLogin to see your stats.\n")
+        return
+    
+    # Read database
+    db = []
+    with open("stat/db.csv", "r") as f:
+        reader = csv.DictReader(f)
+        for line in reader:
+            db.append(line)
+    
+    # Find the user
+    user_data = None
+    for user in db:
+        if user["id"] == id:
+            user_data = user
+            break
+    
+    if not user_data:
+        print("\nUser not found in database.\n")
+        return
+    
+    # Display statistics
+    print(f"\n=== Statistics for {user_data['name']} ===\n")
+    
+    # Tic-Tac-Toe stats (with draws)
+    ttt_games = int(user_data["ttt_games"])
+    ttt_wins = int(user_data["ttt_wins"])
+    ttt_losses = int(user_data["ttt_losses"])
+    ttt_draws = int(user_data["ttt_draws"])
+    ttt_winrate = (ttt_wins / ttt_games * 100) if ttt_games > 0 else 0
+    
+    # Hangman stats
+    hm_games = int(user_data["hm_games"])
+    hm_wins = int(user_data["hm_wins"])
+    hm_losses = int(user_data["hm_losses"])
+    hm_winrate = (hm_wins / hm_games * 100) if hm_games > 0 else 0
+    
+    # Little Professor stats
+    lp_games = int(user_data["lp_games"])
+    lp_wins = int(user_data["lp_wins"])
+    lp_losses = int(user_data["lp_losses"])
+    lp_winrate = (lp_wins / lp_games * 100) if lp_games > 0 else 0
+    
+    # Create detailed stats table
+    table = PrettyTable()
+    table.field_names = ["Game", "Games", "Wins", "Losses", "Draws", "Win Rate"]
+    table.add_rows([
+        ["Tic-Tac-Toe", ttt_games, ttt_wins, ttt_losses, ttt_draws, f"{ttt_winrate:.1f}%"],
+        ["Hangman", hm_games, hm_wins, hm_losses, "-", f"{hm_winrate:.1f}%"],
+        ["Little Professor", lp_games, lp_wins, lp_losses, "-", f"{lp_winrate:.1f}%"]
+    ])
+    print(table)
+    
+    # Overall stats
+    total_games = ttt_games + hm_games + lp_games
+    total_wins = ttt_wins + hm_wins + lp_wins
+    overall_winrate = (total_wins / total_games * 100) if total_games > 0 else 0
+    
+    print(f"\nTotal Games Played: {total_games}")
+    print(f"Total Wins: {total_wins}")
+    print(f"Overall Win Rate: {overall_winrate:.1f}%\n")
+    
+    input("Press enter to go back to menu...")
 
 def login():
     db = []
@@ -55,7 +156,8 @@ def login():
     else:
         with open("stat/db.csv", "a") as f:
             writer = csv.writer(f)
-            writer.writerow([id, name, 0, 0, 0])
+            # Write new user with all stat columns: id, name, ttt(3), hm(3), lp(3) = 12 columns
+            writer.writerow([id, name, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
         print("\nAccount created successfully!")
         print(f"\nWelcome, {name}. Enjoy!\n")
     mainMenu(name, id)
@@ -84,11 +186,14 @@ def mainMenu(name="Guest", id=None):
         
         match(response):
             case '1':
-                pass
+                [totalGames, totalWins, totalLoses, totalDraws] = tickTacToe()
+                updateStat(id, "t", totalGames, totalWins, totalLoses, totalDraws)
             case '2':
-                pass
+                [total, done] = hangman()
+                updateStat(id, "h", total, done, total-done)
             case '3':
-                pass 
+                [totalGame, totalWin] = littleProfessor()
+                updateStat(id, "l", totalGame, totalWin, totalGame-totalWin) 
             case '4':
                 showStat(id)
             case '0':

@@ -70,7 +70,7 @@ def userMove(board, userMarker):
 def easyAiMove(board, aiMarker):
     print("AI is thinking",end="")
     for _ in range(3):
-        time.sleep(0.7)
+        time.sleep(0.5)
         print(".",end="",flush=True)
     print("\r\033[K", end="")
 
@@ -84,7 +84,7 @@ def easyAiMove(board, aiMarker):
 def mediumAiMove(board, aiMarker, playerMarker):
     print("AI is thinking",end="")
     for _ in range(3):
-        time.sleep(0.7)
+        time.sleep(0.5)
         print(".",end="",flush=True)
     print("\r\033[K", end="")
     
@@ -120,7 +120,7 @@ def hardAiMove(board, aiMarker, playerMarker):
 
     print("AI is thinking", end="")
     for _ in range(3):
-        time.sleep(0.7)
+        time.sleep(0.5)
         print(".", end="", flush=True)
     print("\r\033[K", end="")
 
@@ -175,6 +175,10 @@ def hardAiMove(board, aiMarker, playerMarker):
         print(f"AI chose: {r+1} {c+1}")
 
 def tickTacToe():
+    totalGames = 0
+    totalWins = 0
+    totalLoses = 0
+    totalDraws = 0
     win_messages = [
         "You won! I have no idea how, but congrats anyway!",
         "Victory is yours! Your skills—or luck—were impressive.",
@@ -205,51 +209,58 @@ def tickTacToe():
         "Tie game! Mutual respect for mediocrity achieved.",
         "It’s a tie! Let’s pretend we planned this dramatic ending."
     ]
-
-    board = [[" "]*3 for _ in range(3)]
-
-    mode = PrettyTable()
-    mode.field_names = ["Command", "Difficulty"]
-    mode.add_rows(
-        [
-            ["1", "Chilling"],
-            ["2", "Serious"],
-            ["3", "Bone Cracking"],
-        ]
-    )
-    print(mode)
     while True:
-        choice = input("Select a difficulty: ")
-        if(choice in ['1','2','3']):
-            break
-    
-    while True:
-        userMarker = input("Choose: 'o' or 'x' ? ")
-        if(userMarker in ['o', 'x']):
-            break
-    aiMarker = 'o' if userMarker == 'x' else 'x'
+        board = [[" "]*3 for _ in range(3)]
 
-    while (not checkStatus(board)[0]):
-        userMove(board, userMarker)
-        printBoard(board)
-        if(not checkStatus(board)[0]):
-            match(choice):
-                case '1':
-                    easyAiMove(board, aiMarker)
-                case '2':
-                    mediumAiMove(board, aiMarker, userMarker)
-                case '3':
-                    hardAiMove(board, aiMarker, userMarker)
+        mode = PrettyTable()
+        mode.field_names = ["Command", "Difficulty"]
+        mode.add_rows(
+            [
+                ["1", "Chilling"],
+                ["2", "Serious"],
+                ["3", "Bone Cracking"],
+            ]
+        )
+        print(mode)
+        while True:
+            choice = input("Select a difficulty: ")
+            if(choice in ['1','2','3']):
+                break
+        
+        while True:
+            userMarker = input("Choose: 'o' or 'x' ? ")
+            if(userMarker in ['o', 'x']):
+                break
+        aiMarker = 'o' if userMarker == 'x' else 'x'
+
+        while (not checkStatus(board)[0]):
+            userMove(board, userMarker)
             printBoard(board)
+            if(not checkStatus(board)[0]):
+                match(choice):
+                    case '1':
+                        easyAiMove(board, aiMarker)
+                    case '2':
+                        mediumAiMove(board, aiMarker, userMarker)
+                    case '3':
+                        hardAiMove(board, aiMarker, userMarker)
+                printBoard(board)
+            else:
+                break
+        
+        if(checkStatus(board)[1] == userMarker):
+            print(random.choice(win_messages))
+            totalWins += 1
+        elif(checkStatus(board)[1] == aiMarker):
+            print(random.choice(lose_messages))
+            totalLoses += 1
         else:
+            print(random.choice(draw_messages))
+            totalDraws += 1
+        
+        totalGames += 1
+        response = input("\nPress enter to play another. Enter 'q' to exit.")
+        if(response == 'q'):
             break
-    
-    if(checkStatus(board)[1] == userMarker):
-        print(random.choice(win_messages))
-    elif(checkStatus(board)[1] == aiMarker):
-        print(random.choice(lose_messages))
-    else:
-        print(random.choice(draw_messages))
 
-tickTacToe()
-
+    return [totalGames, totalWins, totalLoses, totalDraws]

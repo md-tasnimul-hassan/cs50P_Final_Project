@@ -88,4 +88,4 @@ def hangman():
     print("\n=== GAME OVER ===")
     print(f"You completed {done}/{total} rounds.")
 
-hangman()
+    return [total, done]

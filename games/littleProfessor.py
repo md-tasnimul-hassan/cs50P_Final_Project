@@ -86,6 +86,3 @@ def littleProfessor():
             if(state != 'q'):
                 i = 0
     return [totalGame, totalWin]
-
-
-littleProfessor()
