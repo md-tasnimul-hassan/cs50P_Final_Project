@@ -1,5 +1,5 @@
 # GameZone - Gamify with Python
-#### Video Demo: <URL HERE>
+#### Video Demo: [YouTube Demo Link](https://youtu.be/IZBLl2UqfM0)
 #### Description:
 
 ## Overview
