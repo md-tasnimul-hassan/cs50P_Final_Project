@@ -56,10 +56,12 @@ def littleProfessor():
                     response = int(input(f"{x} + {y} = "))
                     if response == (x+y):
                         success = True
+                        print("Correct !")
                         totalWin += 1
                         break
                     else:
                         userTry += 1
+                        print(f"Opps wrong! You have {3-userTry} tries left.")
                 except:
                     print("Please enter a number.")
             
@@ -71,10 +73,12 @@ def littleProfessor():
                     response = int(input(f"{max(x,y)} - {min(x,y)} = "))
                     if response == (max(x,y)-min(x,y)):
                         success = True
+                        print("Correct !")
                         totalWin += 1
                         break
                     else:
                         userTry += 1
+                        print(f"Opps wrong! You have {3-userTry} tries left.")
                 except:
                     print("Please enter a number.")
             

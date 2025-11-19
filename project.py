@@ -7,6 +7,24 @@ from games.tickTackToe import tickTacToe
 from games.hangman import hangman
 from games.littleProfessor import littleProfessor
 
+def validate_email(email):
+    """Validate email format - returns True if valid, False otherwise"""
+    if not email or not isinstance(email, str):
+        return False
+    return bool(re.search(r"^\w+@\w+\.\w+$", email.strip().lower()))
+
+def validate_name(name):
+    """Validate name format - returns True if valid, False otherwise"""
+    if not name or not isinstance(name, str):
+        return False
+    return bool(re.search(r"\w+", name.strip()))
+
+def calculate_win_rate(wins, total_games):
+    """Calculate win rate percentage - returns float"""
+    if total_games <= 0:
+        return 0.0
+    return round((wins / total_games) * 100, 1)
+
 def updateStat(id, gameName, total, win, lose, draw=0):
     """Update user statistics in the database after playing a game"""
     if id == None:
@@ -82,19 +100,19 @@ def showStat(id):
     ttt_wins = int(user_data["ttt_wins"])
     ttt_losses = int(user_data["ttt_losses"])
     ttt_draws = int(user_data["ttt_draws"])
-    ttt_winrate = (ttt_wins / ttt_games * 100) if ttt_games > 0 else 0
+    ttt_winrate = calculate_win_rate(ttt_wins, ttt_games)
     
     # Hangman stats
     hm_games = int(user_data["hm_games"])
     hm_wins = int(user_data["hm_wins"])
     hm_losses = int(user_data["hm_losses"])
-    hm_winrate = (hm_wins / hm_games * 100) if hm_games > 0 else 0
+    hm_winrate = calculate_win_rate(hm_wins, hm_games)
     
     # Little Professor stats
     lp_games = int(user_data["lp_games"])
     lp_wins = int(user_data["lp_wins"])
     lp_losses = int(user_data["lp_losses"])
-    lp_winrate = (lp_wins / lp_games * 100) if lp_games > 0 else 0
+    lp_winrate = calculate_win_rate(lp_wins, lp_games)
     
     # Create detailed stats table
     table = PrettyTable()
@@ -109,7 +127,7 @@ def showStat(id):
     # Overall stats
     total_games = ttt_games + hm_games + lp_games
     total_wins = ttt_wins + hm_wins + lp_wins
-    overall_winrate = (total_wins / total_games * 100) if total_games > 0 else 0
+    overall_winrate = calculate_win_rate(total_wins, total_games)
     
     print(f"\nTotal Games Played: {total_games}")
     print(f"Total Wins: {total_wins}")
@@ -131,7 +149,7 @@ def login():
     while True:
         try:
             id = input("Enter your email: ").lower().strip()
-            if(not re.search(r"^\w+@\w+\.\w+$" ,id)):
+            if not validate_email(id):
                 raise ValueError
             # check if user already exists
             for line in db:
@@ -141,7 +159,7 @@ def login():
             # Get name for new user
             if not Found:
                 name = input("Enter your name: ").strip().title()
-                if(not re.search(r"\w+", name)):
+                if not validate_name(name):
                     raise ValueError
             break
         except:

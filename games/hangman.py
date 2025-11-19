@@ -3,7 +3,7 @@ import random
 
 def get_word():
     words = []
-    with open("hangwords.csv") as f:
+    with open("games/hangwords.csv") as f:
         reader = csv.reader(f)
         for row in reader:
             for w in row:
